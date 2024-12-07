@@ -1,0 +1,350 @@
+﻿@page "/Client/PositionSetting"
+
+@using System.Text.Json
+@using System.Net.Http
+
+@using FamilyManage.Client.Pages.Client.Cards
+@using FamilyManage.Shared.Data
+@using FamilyManage.Shared
+
+
+<h3>牌位设定</h3>
+
+<label>条目:</label>
+<select>
+    <option>祈福</option>
+    <option>超度</option>
+</select>
+
+<div style="white-space:pre;text-align:center">
+    <!-- <div>
+         <label>xx：行 <button @onclick="()=>appendLine()">+</button> <button>-</button>  列 <button>+</button> <button>-</button></label>
+      </div>-->
+    <div>
+        <!-- <div>内部(加表)：<InputNumber @bind-Value="rowsAdd" /> <InputNumber @bind-Value="columnsAdd" /></div> -->
+        <div><input @bind-value="columns" type="number" /></div>
+        <div class="Button-same-line">
+            <button @onclick="()=>subModule(MethodEnum.Add)">切分</button>
+            <button @onclick="()=>subModule(MethodEnum.ReplaceTable)">替换</button>
+            <button @onclick="()=>subModule(MethodEnum.DeleteTable)">删除table</button>
+        </div>
+
+        <table style="border:solid;">
+            <thead style="background-color:antiquewhite">
+                <tr stlye="boder:">
+                    @foreach (Style style in CommonVars.StyleList.Styles)
+                    {
+                        <td>@style.Prompt</td>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    @foreach (var style in @CommonVars.StyleList.Styles)
+                    {
+                        try
+                        {
+                            Style? sty = currentModule.styles.GetStyle(style.Name);
+                            List<StyleSelect> ss = CommonVars.GetStyleSelects(sty.Name);
+                            <td>
+                                <select @bind="sty.Value">
+                                    @foreach (StyleSelect ss1 in ss)
+                                    {
+                                        <option value="@ss1.css">
+                                            @ss1.mode
+                                        </option>
+                                    }
+                                </select>
+                            </td>
+                        }
+                        catch (Exception ex)
+                        {
+                            bool xx = Vars.currentModule == null;
+                            <div>@ex.Message  xx=@xx</div>
+                        }
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div style="white-space:pre;text-align:center">
+    <div>
+        <input @bind-value="templateName" type="text" />
+    </div>
+    <div class="Button-same-line">
+        <button @onclick="async ()=>await restoreTemplate()">采用模板</button>
+        <button @onclick="saveAsTemplate">保存模板</button>
+        <button>保存数据</button>
+        <button @onclick="print">打印</button>
+    </div>
+</div>
+
+<hr />
+
+<div id=@printArea>
+    <GridCard gt="gTable" OnStatusChanged="ChangeState" />
+</div>
+
+<div>source=@source</div>
+<div>msg   =@msg</div>
+
+@code {
+    //=======================================================================================================================
+    //打印部分区域
+    //https://www.codexworld.com/print-page-area-javascript/
+    //Style[] st = new Style[] { new Style() { Name = "1", Value = "vertical-lr" }, new Style() { Value = "center" } };
+    private const string printArea = "PrintArea";
+    private string? source { get; set; } = null;
+
+    private enum MethodEnum { Add, Sub, DeleteTable, DeleteModule, ReplaceTable }
+
+    private static string msg { get; set; } = null;
+
+    private GridModule? currentModule => Vars.currentModule;
+    /*{
+    get => Vars.currentModule;
+    set => Vars.currentModule = value;
+    }*/
+
+    // gTable.modules[0][0];
+    private GridTable? currentTable => Vars.currentTable;// gTable;
+    /*{
+    get => Vars.currentTable;// gTable;
+    set => Vars.currentTable = value;
+    }*/
+
+
+    private int rowsAdd { get; set; } = 2;
+    private int columnsAdd { get; set; } = 1;
+    private string columns { get; set; } = "0";
+
+    private static string templateName { get; set; } = Guid.NewGuid().ToString();
+    private static string template { get; set; } = "";
+
+
+    private FamilyManage.Shared.Data.GridTable t1 = new GridTable("1");
+
+    private GridTable t2 = new GridTable("1221") { nRows = 2 };
+
+    private static GridTable gTable { get; set; } = new GridTable("2");//
+
+
+    //-------------------------------------------------------------------------------------------------------------
+
+    protected override Task OnInitializedAsync()
+    {
+
+        if (Vars.currentTable == null)
+        {
+            Vars.currentTable = gTable;
+            //currentTable = Vars.currentTable;
+        }
+        if (Vars.currentModule == null)
+        {
+            Vars.currentModule = currentTable.modules[0][0];
+            //currentModule = Vars.currentModule;
+        }
+        if (CommonVars.StyleList == null)
+            CommonVars.StyleList = currentModule.styles;
+        return base.OnInitializedAsync();
+    }
+
+    private void renew(ChangeEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private void ChangeState(bool status)
+    {
+        if (status)
+            StateHasChanged();
+    }
+
+    private async Task restoreTemplate()
+    {
+        try
+        {
+            HttpResponseMessage result = await Http.PostAsJsonAsync<string>("/api/template/restore", templateName);
+            result.EnsureSuccessStatusCode();
+            var aa = await result.Content.ReadFromJsonAsync<Template>();
+            //GridTable? tt = MyJson.Deserialize(aa.JsonString);9999
+            if (aa == null)
+            {
+                msg = $"找不到模板{templateName}";
+            }
+            else
+                gTable = aa.GridTable;
+        }
+        catch (Exception ex)
+        {
+            msg = ex.Message;
+
+        }
+        StateHasChanged();
+    }
+
+    string fuckcss = "";
+    private void testcss()
+    {
+        fuckcss = $"{currentModule.styles.Styles.ToArray()[0].Value} !!!!!!!!!!!   {currentModule.i}+{currentModule.j} {currentModule.words}  {currentModule.css}";
+        Console.WriteLine($"{currentModule.words}");
+        StateHasChanged();
+    }
+
+    private async Task subModule(MethodEnum method)
+    {
+        //currentModule = Vars.currentModule;
+        //currentTable = Vars.currentTable;
+        if (currentModule == null || currentTable == null)
+        {
+            msg = "确定操作的位置先";
+            return;
+        }
+        switch (method)
+        {
+            case MethodEnum.Add:
+                int xx = rowsAdd;
+                GridTable tt = Vars.currentModule.setChild(new GridTable(columns));
+                if (tt != null)
+                {
+                    Vars.currentTable = tt;
+                    Vars.currentModule = tt.modules[0][0];
+                }
+                //  currentModule.child.modules = new GridModule[rowsAdd, columnsAdd];
+                break;
+            case MethodEnum.DeleteTable:
+                GridModule? father = currentTable.father;
+                if (father == null)
+                {
+                    msg = "最顶层的不能删";
+                    return;
+                }
+                else
+                {
+                    father.setChild(null);
+                    //currentTable = father.father;//module的father
+                    Vars.currentModule = father;
+                }
+                break;
+            case MethodEnum.ReplaceTable:
+                GridModule? md = currentTable.father;
+                GridTable gt = new GridTable(columns);
+                if (md == null)
+                {
+                    gTable = gt;
+                }
+                else
+                    try
+                    {
+                        md?.setChild(gt);
+                    }
+                    catch (Exception ex)
+                    {
+                        msg = ex.Message;
+                    }
+                break;
+            case MethodEnum.DeleteModule:
+                break;
+            default:
+                break;
+        }
+        msg = "ok";
+
+    }
+
+    private async Task onSelectCss(EventArgs e)
+    {
+        //Vars.currentModule.styles=CommonVars.st
+    }
+
+    //测试返回值是不是变了
+    private async Task saveAsTemplate()
+    {
+        try
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions() { ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles };
+            string xx = JsonSerializer.Serialize<GridTable>(gTable, options);
+            Template template = new Template()
+                {
+                    // Id = 0,//新的template
+                    Name = templateName,
+                    JsonString = "hello",
+                    GridTable = gTable,
+                };
+            string str0 = JsonSerializer.Serialize(template, options);
+            Template tpltt = JsonSerializer.Deserialize<Template>(str0);
+            HttpResponseMessage result = await Http.PostAsJsonAsync<Template>("/api/Template/save", template, options);
+            //GridTable t = template.GridTable;
+            //HttpResponseMessage result = await Http.PostAsJsonAsync<GridTable>("/api/template/test", t);
+            //result.EnsureSuccessStatusCode();
+            if (result.IsSuccessStatusCode)
+            {
+                Template tt = await result.Content.ReadFromJsonAsync<Template>();
+                msg = $"{template.GridTable.Id}==={tt.GridTable.Id}";
+                //msg = await result.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                msg = "失败";
+            }
+        }
+        catch(Exception ex)
+        {
+            msg = ex.Message;
+        }
+    }
+
+    private async Task saveAsTemplate1()
+    {
+        string s;
+        source = gTable.Id.ToString();
+        try
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions() { ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve };
+            template = JsonSerializer.Serialize<GridTable>(gTable, options);
+            //GridTable? aa = MyJson.Deserialize(template);
+            //Http.PostAsJsonAsync<
+            Template tp = new Template()
+                {
+                    Name = templateName,
+                    JsonString = template,
+                    GridTable = gTable,
+                };
+            HttpResponseMessage result = await Http.PostAsJsonAsync<Template>("/api/template/save", tp);
+            result.EnsureSuccessStatusCode();
+            //读取result的对象实例
+            var resultObject =await result.Content.ReadFromJsonAsync<Template>(options);
+            
+
+            msg = resultObject.Id.ToString();
+            // GridTable? aa = MyJson.Deserialize(tp.JsonString);
+        }
+        catch (Exception ex)
+        {
+            msg = ex.Message;
+        }
+        StateHasChanged();
+    }
+
+    private Task addMessage(List<string> messages)
+    {
+        messages.Add("");
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private Task saveData()
+    {
+
+        return Task.CompletedTask;
+    }
+
+    //readonly IJSRuntime js;
+    private async Task print()
+    {
+        await js.InvokeVoidAsync("myPrint");
+        //PrintingService.Print("PrintArea", PrintType.Html);
+
+    }
+}

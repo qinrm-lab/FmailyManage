@@ -1,0 +1,85 @@
+﻿@page "/Client/FamilySelect"
+@page "/aa"
+
+
+@using FamilyManage.Data
+@using FamilyManage.Shared
+
+@inject HttpClient http
+@inject NavigationManager navigate
+
+@if (GetFamilies?.Length == 0 || GetFamilies == null)
+{
+    <h3>FamilySelect</h3>
+    <div>
+        <div><label>家族名字:<input  type="text" @bind="id" onclick="@clear"/></label></div>
+        <div>@msg</div>
+        <div><button onclick="@(async ()=>await selectAsync())">查找</button></div>
+        <div><button onclick="@(async() =>await createAsync())" >创建</button></div>
+    </div>
+}
+else//@if (GetFamilies != null && GetFamilies?.Length > 0)
+{
+    <div>
+    <InputSelect @bind-Value="family">
+        @foreach(var aa in families)
+        {
+        <option>@aa.Name</option>
+        }
+    </InputSelect>
+    </div>
+    <button @onclick="jump">选择该家族</button>
+}
+
+@id
+
+@code {
+    private string id { get; set; } = "haha";
+    private Family[]? GetFamilies{ get; set; }
+    List<Family>? families{ get; set; }
+    private string msg{ get; set;  }
+    private Family? family{ get; set; }
+
+    private async Task test()
+    {
+        if(string.IsNullOrEmpty(id))
+        {
+            msg = "家族名字不能为空";
+            return;
+        }
+    }
+
+    private async Task selectAsync()
+    {
+        try
+        {
+            //families = await http.GetFromJsonAsync<List<Family>?>(WebApiAddress.Family(OperationEnum.Read, id));
+        }catch(Exception  ex)
+        {
+            msg = ex.Message;
+        }
+    }
+
+    private async Task createAsync()
+    {
+        try
+        {
+            //var response= await http.PostAsJsonAsync<string>(WebApiAddress.Family(OperationEnum.Create), id);
+            //msg= response.StatusCode.ToString();
+        }
+        catch(Exception ex)
+        {
+            msg = ex.Message;
+        }
+    }
+
+    private void clear()
+    {
+        msg = "";
+    }
+
+    private void jump()
+    {
+        navigate.NavigateTo("/Client/AddFamily");
+    }
+}

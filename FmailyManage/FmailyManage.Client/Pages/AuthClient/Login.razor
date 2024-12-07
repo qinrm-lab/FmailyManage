@@ -1,0 +1,75 @@
+﻿@page "/login"
+@rendermode InteractiveAuto
+
+@using System.Net.Http
+@using FamilyManage.Shared.Auth
+@using AuthJwt.Client
+@using Microsoft.AspNetCore.Components.Web
+
+@using FamilyManage.Shared.Auth
+
+
+@inject HttpClient Http
+@inject TokenAuthenticationStateProvider AuthStateProvider
+@inject IAuthorizationService authorizationService
+
+
+<h3>登录</h3>
+
+<p>@message</p>
+
+@if (loginFailure)
+{
+	<div class="alert alert-danger">无法登录</div>
+}
+@if (true)// (await authorizationService.AuthorizeAsync(User, Permissions.Roles.Guest)).Succeeded)
+{
+	<EditForm Model="user" OnValidSubmit="async () => await OnValid()" style="max-width:500px;">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<div class="mb-2">
+			<InputText class="form-control" @bind-Value="user.Name" placeholder="输入用户名"></InputText>
+		</div>
+		<div class="mb-2">
+			<InputText type="password" autocomplete="on" class="form-control" @bind-Value="user.Password" placeholder="输入密码"></InputText>
+		</div>
+		<div class="mb-2 text-right">
+			<button class="btn btn-secondary" disabled="@isDisabled">login</button>
+		</div>
+	</EditForm>
+}
+<p>  msg0= @msg0</p>
+<p>aab=@aab</p>
+
+
+@code {
+	LoginModel user = new LoginModel();
+	string message = string.Empty;
+	bool isDisabled = false;
+	string msg0 = "";
+	string aab;
+	bool loginFailure = false;
+
+
+
+	private async Task OnValid()
+	{
+		LoginInterfaceModel userWeb = new LoginInterfaceModel(user);
+		HttpResponseMessage result = await Http.PostAsJsonAsync<LoginInterfaceModel>("/api/auth/login", userWeb);
+		if (result.IsSuccessStatusCode)
+		{
+			LoginResult? aa = await result.Content.ReadFromJsonAsync<LoginResult>();
+			loginFailure = true;
+			loginFailure = aa?.JwtBearer == null;
+			msg0 = aa.Message + " " + aa.JwtBearer;
+			msg0 = $" hi fuck login={loginFailure}\n{aa.JwtBearer}";
+			if (!loginFailure)
+			{
+				await AuthStateProvider.SetTokenAsync(aa.JwtBearer, aa.Expiry);
+				msg0 = "heheheh\n" + msg0;
+			}
+
+		}
+
+	}
+}

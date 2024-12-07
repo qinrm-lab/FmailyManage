@@ -1,0 +1,70 @@
+﻿@page "/Client/Cards/GridCard"
+
+@using FamilyManage.Client.Pages.Client.Cards
+@using FamilyManage.Shared.Data
+
+<table>
+    <tbody>
+        @for (int i = 0; i < gt.modules.Length; i++)
+        {
+            int i0 = i;
+            GridModule[] gmi = gt.modules[i];
+            <tr>
+                @for (int j = 0; j < gmi.Length; j++)
+                {
+                    int j0 = j;
+                    GridModule? module = gmi[j0];
+                    <td>
+
+                        @if (module.Child != null)
+                        {
+                            <GridCard gt="module.Child" OnStatusChanged="ChangeStatus" />
+                        }
+                        else
+                        {
+                            <div contenteditable="true" style=@module.styles.ToString() @onclick="()=>setFocus(module)">@module.words</div>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public GridTable gt { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnStatusChanged { get; set; }
+
+
+    private string[] color = new string[] { "red", "yellow" };
+
+    public GridModule[][] modules { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        //Vars.currentTable = null;
+        //Vars.currentModule = null;
+    }
+
+    private void ChangeStatus()
+    {
+        OnStatusChanged.InvokeAsync(true);
+    }
+
+
+    private void setFocus(GridModule module)
+    {
+        if (module.id.Equals(Vars.currentModule?.id))
+            return;
+        Vars.currentTable = gt;
+        Vars.currentModule = module;
+        ChangeStatus();
+        //StateHasChanged();
+        Console.WriteLine($"{module.words}");
+    }
+}

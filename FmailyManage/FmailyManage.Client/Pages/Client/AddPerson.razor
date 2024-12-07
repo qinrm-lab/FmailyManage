@@ -1,0 +1,105 @@
+﻿@page "/Client/AddPerson"
+
+@using FamilyManage.Data
+@using FamilyManage.Shared
+
+@inject HttpClient http
+
+<h3>添加人员名单</h3>
+人员香客编辑，寺庙内部编辑资料
+<!--
+<form method="get" action="/NameKey/Details">
+    <input type="submit" value="test" />
+</form>
+-->
+
+<EditForm Model="@person" OnValidSubmit="@(async ()=>await saveAsync())">
+    <DataAnnotationsValidator />
+    <p><label>姓：<input type="text" @bind-value="person.Name.LastName" /></label>   <label>名：<input type="text" @bind-value="person.Name.FirstName" /></label>   <label>称谓（陈李氏）：<input type="text" @bind-value="person.Name.FirstName" /></label></p>
+    <p><label>第几代: <input type="number" @bind-value="person.Generation" /></label></p>
+    <p>
+        <label>
+            性别:<InputSelect @bind-Value="person.Gender">
+                @foreach (var gender in Enum.GetValues(typeof(GenderEnum)))
+                {
+                    <option>@gender</option>
+                }
+            </InputSelect>
+        </label>
+    </p>
+    <p>
+        <label>
+            身份证明:
+            <InputSelect @bind-Value="person.PersonalID.Name">
+                @if (aan?.Length > 0)
+                    foreach (var name in aan)
+                    {
+                        KeyValue aa = new KeyValue() { Name = name.Name, Value = name.Value };
+                        <option>@name.Value</option>
+                    }
+            </InputSelect>
+            <InputText @bind-Value="person.PersonalID.Value" />
+        </label>
+    </p>
+    <ValidationSummary />
+    <input type="submit" value="添加" />
+
+</EditForm>
+
+
+Message=@msg
+
+@code {
+    ///Client/AddPerson
+    private static Person person = new Person();
+    string msg = "hi";
+
+    static List<KeyValue>? names;
+    //private WeatherForecast[]? forecasts;
+    KeyValue[]? aan;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            //ms = await http.GetStringAsync(@"NameKey/Details/5st");
+            //ms = await http.GetStringAsync("NameKey");
+            //names = await http.GetFromJsonAsync<KeyValue[]>("Name");
+            //var xx= await http.GetAsync(@$"NameKey/Details/{KeyEnum.身份ID}");
+            //xx.Content.Headers.
+            //ms=await xx.Content.ReadAsStringAsync();
+           //var fuck=  await http.GetFromJsonAsync<Action<KeyValue>>(@$"NameKey/Details/{KeyEnum.身份ID}");
+            aan = await http.GetFromJsonAsync<KeyValue[]>(@$"NameKey/Details/{KeyEnum.身份ID}");
+            //var xx = await http.GetFromJsonAsync(@$"NameKey/Details/{KeyEnum.身份ID}",typeof(KeyValue[]));
+             names =aan.ToList<KeyValue>();
+        }
+        catch (Exception ex)
+        {
+            msg = ex.Message;
+        }
+    }
+
+    private async Task saveAsync()
+    {
+        try
+        {
+            msg = $"{person.PersonalID.Name} {person.PersonalID.Value}";
+        }
+        catch (Exception ex)
+        {
+            msg = ex.Message;
+        }
+        StateHasChanged();
+    }
+}
+
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+    /** protected override async Task OnInitializedAsync()
+     {
+        // forecasts = await http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+     }*/
+}

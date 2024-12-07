@@ -1,0 +1,58 @@
+﻿@page "/register"
+
+
+
+@inject HttpClient Http
+
+<h3>注册</h3>
+
+<p>@message</p>
+<p><a href="/login">@login</a></p>
+
+<EditForm Model="reg" OnValidSubmit="OnValid" style="max-width:500px;">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+	<div class="mb-2">
+		<InputText class="form-control" @bind-Value="reg.Name" placeholder="用户名"></InputText>
+	</div>
+	<div class="mb-2">
+		<InputText type="password" class="form-control" @bind-Value="reg.Password" placeholder="输入密码"></InputText>
+	</div>
+	<div class="mb-2">
+		<InputText type="password" class="form-control" @bind-Value="reg.confirmPwd" placeholder="确认密码"></InputText>
+	</div>
+	<div class="mb-2">
+		<InputText type="text" class="form-control" @bind-Value="reg.inviteCode" placeholder="邀请码"></InputText>
+	</div>
+	<div class="mb-2 text-right">
+		<button class="btn btn-secondary" disabled="@isDisabled">注册</button>
+	</div>
+</EditForm>
+
+@code {
+	RegModel reg = new RegModel();
+
+	string message = string.Empty, login = string.Empty;
+	bool isDisabled = false;
+
+	private async Task OnValid()
+	{
+		isDisabled = true;
+		//LoginInterfaceModel webUser = new LoginInterfaceModel(reg);
+		using (var msg = await Http.PostAsJsonAsync<RegModel>("/api/auth/register", reg, System.Threading.CancellationToken.None))
+		{
+			if (msg.IsSuccessStatusCode)
+			{
+				LoginResult result = await msg.Content.ReadFromJsonAsync<LoginResult>();
+				message = result.Message;
+				if (result.success)
+				{
+					message += " 请继续登录.";
+					login = "点击登录.";
+				}
+				else
+					isDisabled = false;
+			}
+		}
+	}
+}

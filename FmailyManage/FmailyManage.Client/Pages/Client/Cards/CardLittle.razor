@@ -1,0 +1,21 @@
+﻿@page "/Client/Cards/CardLittle"
+
+@using FamilyManage.Client.Pages.Client.Cards
+
+<h3>小牌位</h3>
+
+result=@aa
+
+<button @onclick="click">++</button>
+
+@code {
+    [Parameter]
+    public int aa{ get; set; }
+
+    private void click()
+    {
+        Vars.aa++;
+        aa++;
+        this.StateHasChanged();
+    }
+}

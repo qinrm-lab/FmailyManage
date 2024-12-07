@@ -1,0 +1,28 @@
+﻿@page "/UserComponent"
+
+@inject IJSRuntime js
+
+<div style="white-space:pre">
+    @if(string.IsNullOrEmpty(username))
+    {
+        <span><a href="/register">注册</a> <a href="/login">login</a></span>
+    }
+    else
+    {
+        <span>hello,@username  <a href="/ChangePassword">修改密码</a>  <a href="/logout">(Logout)</a></span>
+    }
+</div>
+
+@code {
+    private string? username = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var userdata = await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
+        if(!string.IsNullOrWhiteSpace(userdata))
+        {
+            username = userdata.Split(";", 2)[0];
+        }
+    }
+}

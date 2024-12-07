@@ -1,0 +1,11 @@
+﻿https://www.icodebang.com/article/310571
+jwt
+
+authorize详解
+//https://www.icodebang.com/article/310571
+
+前置条件：Microsoft.EntityFrameworkCore.Tools
+PM> add-migration templecontext_id -Context templatexxxx
+
+配置测试https
+PM> dotnet dev-certs https --trust

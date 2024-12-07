@@ -1,67 +1,20 @@
-using FmailyManage.Client.Pages;
-using FmailyManage.Components;
-
-using FamilyManage.Server;
-using FamilyManage;
-using FamilyManage.Data;
+﻿using FamilyManage.Data;
 using FamilyManage.Server.Data;
-using FmailyManage;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Security.Principal;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient;
 
-namespace FmailyManage
-{
-    public   class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+using FamilyManage;
+using FamilyManage.Server;
 
-            // Add services to the container.
-            builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents()
-                .AddInteractiveWebAssemblyComponents();
-
-            //var scope =builder.Build().Services.CreateScope();
-                //var services = scope.ServiceProvider;
-
-               // var logger = services.GetRequiredService<ILogger<Program>>();
-            
-            StartUp.Init(builder);
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseWebAssemblyDebugging();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.UseAntiforgery();
-
-            app.MapStaticAssets();
-            app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode()
-                .AddInteractiveWebAssemblyRenderMode()
-                .AddAdditionalAssemblies(typeof(Client._Imports).Assembly);
-
-            app.Run();
-        }
-    }
-}
-
-
-namespace FamilyManage
+namespace FamilyManage.xxx
 {
     /// <summary>
     /// app 初始化之前运行，然后马上就是app初始化
@@ -72,15 +25,15 @@ namespace FamilyManage
         private const string postgresqlString = "TempleContextPostgresql";
         private const string sqlStringPwd = "TempleContextSqlServerPwd";
         private static string keyConnectionString = sqlStringPwd;
-        private static string? connectionString;
+        private static string? connectionString  ; 
 
-        private static IConfiguration? configuration;
+        private static  IConfiguration? configuration;
 
 
         private static void testdb()
         {
             //string connectionString = "Server=QIN5521\\FAMILY;Database=fucktest;User Id=sa;Password=abcd1234;Encrypt=True;TrustServerCertificate=True;";
-
+            
             try
             {
                 using (SqlConnection connection = new SqlConnection(connectionString))//"Server=qin5521\\FAMILY;Database=fucktest;User Id=sa;Password=abcd1234;Encrypt=True;TrustServerCertificate=True;"
@@ -103,14 +56,14 @@ namespace FamilyManage
         /// Init must just before app.Build()
         /// </summary>
         /// <param name="builder"></param>
-        public static void Initxx(WebApplicationBuilder builder)
+        public static void Initxx( WebApplicationBuilder builder)
         {
             IServiceCollection services = builder.Services;
-            init0(services);
+            init0( services);
             //var app = builder.Build();
             //init1( app);;
         }
-        public static void Init(WebApplicationBuilder builder)
+        public static void Init( WebApplicationBuilder builder)
         {
             configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
@@ -126,16 +79,16 @@ namespace FamilyManage
                 //services.AddSingleton(provider => configuration[connectionString] );
 
                 Console.WriteLine($"{connectionString}");
-                builder.Services.AddDbContext<TempleContext>(options =>
+                builder.Services.AddDbContext<TempleContext>(options=>
                 options.UseSqlServer(connectionString)
                 );
                 //builder.Services.AddSingleton<TempleContext>();
                 /*builder.Services.TryAddSingleton<DbContextOptions<TempleContext>>(options=>
                 options.us
                 );*/
-
+               
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
 
             }
@@ -161,7 +114,7 @@ namespace FamilyManage
         /// 数据库相关的初始化
         /// </summary>
         /// <param name="app"></param>
-        public static void InitDb(WebApplication app)
+        public static   void InitDb( WebApplication app)
         {
             using (var scope = app.Services.CreateScope())
             {
@@ -181,28 +134,28 @@ namespace FamilyManage
                     }
                     else
                     {
-                        // context.Database.Migrate();
-                        //context.Database.en
+                       // context.Database.Migrate();
+                       //context.Database.en
                     }
                     seed(context);
 
-                    ShareData.Names = context.KeyValues.ToList();
+                    ShareData.Names =  context.KeyValues.ToList();
 
                     //context.Database.CommitTransaction();
                 }
                 catch (Exception ex)
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
+                  /*  var logger = services.GetRequiredService<ILogger< Program>>();
                     logger.LogError(ex, "An error occurred creating the DB.");
                     string userName = Environment.UserName;//WindowsIdentity.GetCurrent().Name;
-                    File.WriteAllText(@"f:\tt\log.txt", $"{userName}\n{ex.Message}");
+                    File.WriteAllText(@"f:\tt\log.txt", $"{userName}\n{ex.Message}");*/
                 }
             }
         }
 
         //-------------------------------------------------
 
-        public static void init0(IServiceCollection services)
+        public static void init0( IServiceCollection services)
         {
             services.AddDbContext<TempleContext>(options =>
             {
@@ -211,7 +164,7 @@ namespace FamilyManage
         }
 
 
-        public static void init1(WebApplication app)
+        public static void init1( WebApplication app)
         {
             using (var scope = app.Services.CreateScope())
             {
@@ -238,19 +191,19 @@ namespace FamilyManage
                 NameClass name = new NameClass()
                 {
                     FirstName = "张",
-                    LastName = "恨水",
+                    LastName="恨水",
                 };
                 Person person = new Person()
                 {
-                    Name = name,
-
+                    Name= name,
+                    
                 };
                 AccountClass account = new AccountClass()
                 {
                     Name = "Admin",
                     Password = "abcd1234",
-                    Role = RoleEnum.Adminitrator,
-                    PersonInfo = person,
+                    Role=RoleEnum.Adminitrator,
+                    PersonInfo=person,
                 };
                 context.Accounts.Add(account);
             }
@@ -264,9 +217,8 @@ namespace FamilyManage
             }
 
             await context.SaveChangesAsync();
-            var aa = context.Accounts.FirstOrDefault();
+            var aa=context.Accounts.FirstOrDefault();
         }
 
     }
 }
-

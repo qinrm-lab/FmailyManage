@@ -1,11 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35417.141 d17.12
+VisualStudioVersion = 17.12.35417.141
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FmailyManage", "FmailyManage\FmailyManage\FmailyManage.csproj", "{3AA07EE9-2F0C-44BA-BAAC-D74D6C865504}"
+	ProjectSection(ProjectDependencies) = postProject
+		{72738D9F-36B8-415B-AB45-08FA8E581122} = {72738D9F-36B8-415B-AB45-08FA8E581122}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FmailyManage.Client", "FmailyManage\FmailyManage.Client\FmailyManage.Client.csproj", "{4FB60256-59D8-44C5-8CBC-54565D307358}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "注释", "注释", "{4EE085CF-45EB-4E21-BF0A-1823BD7B16C3}"
+	ProjectSection(SolutionItems) = preProject
+		ReadMe.Txt = ReadMe.Txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FamilyManage.Shared", "Shared\FamilyManage.Shared.csproj", "{72738D9F-36B8-415B-AB45-08FA8E581122}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +31,10 @@ Global
 		{4FB60256-59D8-44C5-8CBC-54565D307358}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FB60256-59D8-44C5-8CBC-54565D307358}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FB60256-59D8-44C5-8CBC-54565D307358}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72738D9F-36B8-415B-AB45-08FA8E581122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72738D9F-36B8-415B-AB45-08FA8E581122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72738D9F-36B8-415B-AB45-08FA8E581122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72738D9F-36B8-415B-AB45-08FA8E581122}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

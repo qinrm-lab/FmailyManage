@@ -1,0 +1,94 @@
+﻿@page "/Client/AddFamily"
+@page "/Client/AddFamily/{operation:int}"
+
+@using FamilyManage.Data
+@using FamilyManage.Shared
+@using Microsoft.AspNetCore.Authorization
+@using FamilyManage.Client
+@using System.Threading.Tasks
+
+@inject HttpClient http
+
+
+<h3>添加s家族</h3>
+
+
+<EditForm Model="@familyTmp" OnValidSubmit="@(async ()=>await getFamily())">
+    <DataAnnotationsValidator />
+    <label>家族名字:<InputText @bind-Value="familyTmp.Name" /></label>
+    <ValidationSummary />
+    <div><input type="submit" value="添加" /></div>
+</EditForm>
+
+<button>修改</button>
+<h3>增加成员</h3>
+@msg
+@operation
+
+@code {
+    [Inject]
+    HttpClient client{ get; set; }
+
+    private static Family familyTmp { get; set; } = new Family();
+
+    [Parameter]
+    public OperationEnum operation{ get; set; }
+    [Parameter]
+    public string name{ get; set; }
+
+    private string msg;
+
+    /*protected override  async Task OnInitializedAsync()
+    {
+    /* try
+                     { 
+    switch (operation)
+    {
+    case OperationEnum.Create:
+        family = new Family() { };
+        family.Operations.Add(new Operation() { Operating = OperationEnum.Create });
+        break;
+        case OperationEnum.Update:
+        family= await http.GetFromJsonAsync<Family>( @$"{WebApiAddress.Family(OperationEnum.Read)}/{familyTmp.Name}");
+        break;
+        default:
+
+        break;
+        }
+         }catch(Exception ex)
+             {
+             msg = ex.Message;
+    }*
+    }*/
+
+    private async Task getFamily()
+    {
+        //await http.GetFromJsonAsync<Family[]?>(WebApiAddress.Family.(OperationEnum.Read, familyTmp.Name));
+    }
+
+    private async Task addFamily()
+    {
+        try
+        {
+            //var response = await http.PostAsJsonAsync("url", family);
+            switch(operation)
+            {
+                case OperationEnum.Read:
+                    var families = FamilyManage.Client.WebApi.Family.Read(1);
+                    break;
+                case OperationEnum.Create:
+                    //string s = WebApiAddress.Family(operation);
+                   // var response=  await http.PostAsJsonAsync<Family>(WebApiAddress.Family(operation), familyTmp);
+                    break;
+                case OperationEnum.Update:
+                    break;
+                default:
+                    break;
+            }
+            //response.
+        }catch(Exception ex)
+        {
+            
+        }
+    }
+}

@@ -1,3 +1,4 @@
+using FamilyManage.Client;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 namespace FmailyManage.Client
@@ -7,6 +8,10 @@ namespace FmailyManage.Client
         static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
+
+            Init.StartUp(ref builder);
+
 
             await builder.Build().RunAsync();
         }
