@@ -29,7 +29,7 @@ namespace FamilyManage.Shared.Http
     /// GridModule在网络中传送的时候需要一些额外信息
     /// </summary>
     public class GridModuleHttp
-    {
+    {  
         public GridModule Module { get; set; }
         public string Name { get; set; }
 
